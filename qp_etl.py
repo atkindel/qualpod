@@ -34,7 +34,7 @@ class QualtricsPodioIntegration(object):
         for label, survey, app, schema, log in self.integrations:
             data = None
             status = None
-            with open(log, 'a') as logfile:
+            with open(os.path.expanduser('~') + log, 'a') as logfile:
                 # Instantiate interfaces and integrate, logging failures as needed
                 try:
                     qualtrics = QualtricsInterface(survey, schema)
@@ -55,6 +55,7 @@ class QualtricsPodioIntegration(object):
                 logfile.write("[%s][%s]: %d items loaded to Podio.\n" % (timestamp, label, status))
 
                 logfile.write("\n")
+
 
 
 if __name__ == '__main__':
