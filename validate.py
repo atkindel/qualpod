@@ -13,6 +13,12 @@ check = sys.argv[1]
 with open(check, 'rU') as f:
     schema = csv.reader(f)
     for line in schema:
+        # Make sure has_default is the last line
+        try:
+            assert not has_default
+        except AssertionError:
+            print "Default line should be last in the schema file."
+
         # Update global schema constraints
         has_default = (line[1] == line[2] == 'default')
 

@@ -6,11 +6,12 @@ import sys
 import os.path
 import json
 import ConfigParser
+import csv
 from pypodio2 import api
 
 class PodioInterface(object):
 
-    def __init__(self, app_id):
+    def __init__(self, app_id, def_labels):
         '''
         Loads Podio API credentials from user-specified location.
         '''
@@ -23,6 +24,14 @@ class PodioInterface(object):
         self.app = int(app_id)
         self.usr = cfg.get('PodioUser', 'p_user') # podio username
         self.pwd = cfg.get('PodioUser', 'p_pass') # password
+        self.labels = self.__setDefaults(def_labels)
+
+    def __setDefaults(self, default_labels):
+        retdict = {}
+        rd = csv.reader(open(os.path.expanduser('~') + default_labels, 'rU'))
+        for row in rd:
+            retdict[row[0]] = row[1]
+        return retdict
 
     def load(self, data, transform):
         '''
@@ -31,8 +40,6 @@ class PodioInterface(object):
         # Initialize Podio API
         c = api.OAuthClient(self.etl, self.key, self.usr, self.pwd)
         status = 0
-
-        print json.dumps(data, indent=4)
 
         # Read data from JSON into dict based on pre-defined schema
         for obj in data['responses']:
@@ -79,14 +86,25 @@ class PodioInterface(object):
                     datestr = obj.pop(q_id).replace('/','-')+" 00:00:00"
                     new_field['values'].append({ 'start': datestr })
 
+                elif q_type == 'default':
+                    def_field = "<p>"
+                    for question in obj.keys():
+                        if question[0] != 'Q':
+                            continue
+                        val = obj.pop(question)
+                        if len(val) < 2:
+                            continue
+                        question = self.labels[question] if question in self.labels.keys() else question
+                        def_field += "<b>%s</b>: %s<br/>" % (question, val)
+                    def_field += "</p>"
+                    new_field['values'].append( {'value': def_field} )
+
                 else:
                     print "'%s' data type not supported. Excluding %s." % (q_type, q_id)
                     continue
 
                 # Construct new item
                 item['fields'].append(new_field)
-
-            print json.dumps(item, indent=4)
 
             # Make a new Podio item and load new object
             try:

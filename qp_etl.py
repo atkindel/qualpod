@@ -31,7 +31,7 @@ class QualtricsPodioIntegration(object):
         timestamp = "%d-%d-%d %d:%d:%d" % (now.year, now.month, now.day,
                                            now.hour, now.minute, now.second)
 
-        for label, survey, app, schema, log in self.integrations:
+        for label, survey, app, schema, default, log in self.integrations:
             data = None
             status = None
             with open(os.path.expanduser('~') + log, 'a') as logfile:
@@ -46,7 +46,7 @@ class QualtricsPodioIntegration(object):
                 logfile.write("[%s][%s]: Qualtrics data extracted.\n" % (timestamp, label))
 
                 try:
-                    podio = PodioInterface(app)
+                    podio = PodioInterface(app, default)
                     status = podio.load(data, transform)
                 except Exception as e:
                     logfile.write("[%s][%s]: %s\n" % (timestamp, label, repr(e)))
