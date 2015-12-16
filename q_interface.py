@@ -91,11 +91,11 @@ class QualtricsInterface(object):
         # Build schema in Podio API format
         with open(schema_dir, 'rU') as schema_map:
             for line in csv.reader(schema_map):
-                pod_id, qual_id, qual_type, default = line
+                pod_id, qual_id, qual_type = line
                 field = {
                     'external_id': pod_id,
                     'values': [
-                        {'value': (qual_id, qual_type, default)}
+                        {'value': (qual_id, qual_type)}
                     ]
                 }
                 transforms['fields'].append(field)
@@ -119,5 +119,5 @@ class QualtricsInterface(object):
 
 
 if __name__ == '__main__':
-    qi = QualtricsInterface('SV_54KM0OWIySmH1HL', '/code/qualpod/lx_schema.csv')
+    qi = QualtricsInterface('SV_54KM0OWIySmH1HL', '/code/qualpod/integrations/lx_events/lx_schema.csv')
     qi.inspect()

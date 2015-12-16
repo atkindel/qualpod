@@ -49,19 +49,19 @@ class PodioInterface(object):
                 new_field = { 'external_id': field['external_id'], 'values': [] }
                 value = None
 
-                q_id, q_type, default = field['values'][0]['value']
+                q_id, q_type = field['values'][0]['value']
 
                 if q_type == 'text':
-                    value = """%s""" % obj.pop(q_id, default)
+                    value = """%s""" % obj.pop(q_id, "NA")
                     if len(value) < 1:
-                        value = '<not entered>'
+                        continue
                     new_field['values'].append( {'value': value})
 
                 elif q_type == 'category':
                     try:
-                        value = int(obj.pop(q_id, default))
+                        value = int(obj.pop(q_id, 1))
                     except ValueError:
-                        value = int(default)
+                        continue
                     new_field['values'].append( {'value': value})
 
                 elif q_type == 'multiple':
@@ -69,16 +69,32 @@ class PodioInterface(object):
                     qz, parts = q_id.split('~')
                     for part in range(1, int(parts)):
                         qid_part = "%s_%d" % (qz, part)
-                        active = obj.pop(qid_part)
+                        active = obj.pop(qid_part, False)
                         if active:
                             new_field['values'].append( {'value': part} )
+
+                elif q_type == 'multitext':
+                    val_field = "<p>"
+                    qz, parts = q_id.split('~')
+                    text_fields = map(int, parts.split('-'))
+                    for part in text_fields:
+                        qid_part = "%s_%d_TEXT" % (qz, part)
+                        datum = obj.pop(qid_part, False)
+                        if datum:
+                            val_field += "%s<br/>" % datum
+                    val_field += "</p>"
+                    new_field['values'].append( {'value': val_field})
 
                 elif q_type == 'link':
                     url = obj.pop(q_id)
                     if not url:
                         continue
                     embed = { 'url': url }
-                    linkobj = c.Embed.create(embed)
+                    try:
+                        linkobj = c.Embed.create(embed)
+                    except:
+                        print "Invalid URL"
+                        continue
                     link_id = linkobj['embed_id']
                     new_field['values'].append({ 'embed': link_id })
 
@@ -94,7 +110,10 @@ class PodioInterface(object):
                         val = obj.pop(question)
                         if len(val) < 2:
                             continue
-                        question = self.labels[question] if question in self.labels.keys() else question
+                        if question in self.labels.keys():
+                            question = self.labels[question]
+                        else
+                            continue
                         def_field += "<b>%s</b>: %s<br/>" % (question, val)
                     def_field += "</p>"
                     new_field['values'].append( {'value': def_field} )
@@ -108,6 +127,7 @@ class PodioInterface(object):
 
             # Make a new Podio item and load new object
             try:
+                print json.dumps(item, indent=4)
                 c.Item.create(self.app, item)
                 status += 1
             except Exception as e:
@@ -130,5 +150,5 @@ class PodioInterface(object):
 
 
 if __name__ == '__main__':
-    pi = PodioInterface(14384887)
-    pi.inspect(354830967)
+    pi = PodioInterface(14384887, '/code/qualpod/integrations/lx_events/lx_default_labels.csv')
+    pi.inspect(357244207)

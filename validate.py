@@ -5,7 +5,7 @@
 import csv
 import sys
 
-ALLOWED_TYPES = ['text', 'category', 'date', 'link', 'multiple', 'default']
+ALLOWED_TYPES = ['text', 'category', 'date', 'link', 'multiple', 'multitext', 'default']
 
 has_default = False
 
