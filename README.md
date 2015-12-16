@@ -79,10 +79,8 @@ business-info,default
 * You'll also need to take note of the **Qualtrics Survey ID** for this survey, just like we did with the Podio App ID. You can get this identifier by clicking "Distribute Survey" and looking at the survey URL. The Survey ID is the part of the URL that looks like &SID=`<SURVEY_ID>`. It should be something like `SV_3hsih4USJx9wsDX0`.
 * The last thing we're going to need is a raw export of an example response for your survey. This software package contains a service that can pull that information for you:
   1. Submit a sample response through your survey. Fill out as many questions as possible, especially if your survey has branching logic; this will help you get a better sense for how the data is formatted.
-  2. Make sure your survey is shared with the VPOL group on Qualtrics.
-  3. Go to `stanford.edu/~atkindel/vptl_integrations/survey_examiner.html`.
-  4. Enter your survey ID into the webform and click **Submit**.
-  5. The page will display the raw survey data for your sample response. You'll need this data shortly.
+  2. Go to your survey on the Qualtrics platform and navigate to "View Results".
+  3. Download the response data in CSV format. The top row contains all of the question data fields that can be routed into Podio.
 
 #### 2c. Adding question type information
 
