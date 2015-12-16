@@ -1,0 +1,453 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Qualpod by atkindel</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Qualpod</h1>
+        <p>Generic interface for Qualtrics-Podio integrations</p>
+
+        <p class="view"><a href="https://github.com/atkindel/qualpod">View the Project on GitHub <small>atkindel/qualpod</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/atkindel/qualpod/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/atkindel/qualpod/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/atkindel/qualpod">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="qualpod" class="anchor" href="#qualpod" aria-hidden="true"><span class="octicon octicon-link"></span></a>qualpod</h1>
+
+<p>Generic interface for Qualtrics-Podio integrations.</p>
+
+<h2>
+<a id="creating-a-new-integration" class="anchor" href="#creating-a-new-integration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating a new integration</h2>
+
+<p>There are three steps to adding a new Qualtrics -&gt; Podio integration.</p>
+
+<ol>
+<li>Initializing the integration files</li>
+<li>Mapping Qualtrics questions to Podio fields
+
+<ol>
+<li>Retrieving Podio field information</li>
+<li>Retrieving Qualtrics question information</li>
+<li>Adding queston type information</li>
+</ol>
+</li>
+<li>Submitting the integration files</li>
+</ol>
+
+<h3>
+<a id="1-initializing-the-integration-files" class="anchor" href="#1-initializing-the-integration-files" aria-hidden="true"><span class="octicon octicon-link"></span></a>1. Initializing the integration files</h3>
+
+<ul>
+<li>Create a new folder. We'll refer to this folder as <code>&lt;folder_name&gt;</code>.</li>
+<li>Create three empty files in your new folder:
+
+<ol>
+<li>
+<code>&lt;folder_name&gt;_events.log</code>
+
+<ul>
+<li>This file will store a running log of the integration software's operations. This is extremely helpful for keeping track of errors as they come up.</li>
+</ul>
+</li>
+<li>
+<code>&lt;folder_name&gt;_schema.csv</code>
+
+<ul>
+<li>This file contains the logic for the integration: it tells the software how to match Qualtrics data to Podio data.</li>
+</ul>
+</li>
+<li>
+<code>&lt;folder_name&gt;_default_labels.csv</code>
+
+<ul>
+<li>This file helps the integration software provide smarter labels for default data fields. More on this below.</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+
+<h3>
+<a id="2-mapping-qualtrics-questions-to-podio-fields" class="anchor" href="#2-mapping-qualtrics-questions-to-podio-fields" aria-hidden="true"><span class="octicon octicon-link"></span></a>2. Mapping Qualtrics questions to Podio fields</h3>
+
+<ul>
+<li>The first thing we need to do is make sure we know which Qualtrics question is paired with which Podio field. To do this, we'll set up a <em>schema</em> that makes an explicit mapping between those pairs.</li>
+<li>Open your schema file. <em>Note that the schema file always needs to be saved in .csv format, otherwise it won't function properly.</em> You can open the file in Excel, WordEdit, Notepad, or any other editing software; whatever you're most familiar with will work. This tutorial will assume you're using a basic text editor.</li>
+<li>To get started, here are a few example lines from a theoretical integration:</li>
+</ul>
+
+<pre><code>business-title,Q1,text
+business-type,Q4,category
+customer-types,Q5~8,multiple
+</code></pre>
+
+<ul>
+<li>Note that each line has four fields. Those fields correspond to the following:
+
+<ol>
+<li>Podio field identifier, e.g. <code>event-title</code> or <code>event-description</code>
+</li>
+<li>Qualtrics question identifier, e.g. <code>Q14</code> or <code>Q12_TEXT</code>
+</li>
+<li>Data type, e.g. <code>text</code> or <code>category</code>
+</li>
+<li>Default field value, e.g. <code>1</code> or <code>NA</code>
+</li>
+</ol>
+</li>
+<li>For each Podio field you want to fill with data from Qualtrics, you need to create a new line that specifies how each of these fields matches up.</li>
+<li>Also notice that each data type has a slightly different notation. We'll go over each of these in more detail below.</li>
+</ul>
+
+<h4>
+<a id="2a-retrieving-podio-field-information" class="anchor" href="#2a-retrieving-podio-field-information" aria-hidden="true"><span class="octicon octicon-link"></span></a>2a. Retrieving Podio field information</h4>
+
+<ul>
+<li>In the first column of the integration schema file, we're going to identify the Podio fields we want to integrate.</li>
+<li>Navigate to the Podio app you're going to integrate, click on the wrench icon on the left sidebar, and scroll down to 'Developer'.</li>
+<li>In the first column of your schema file, type in the <strong>External ID</strong> of each field you want to automatically populate with data from Qualtrics survey responses.
+
+<ul>
+<li>If you have a field you want to use to capture special notes or other questions from the Qualtrics form not captured in their own distinct Podio fields, <em>list that field last in the schema file</em>. We'll review how to set up these 'default' fields shortly.</li>
+<li>Not every field on Podio needs to be automatically populated. However, the software does assume that every question response received on Qualtrics will be either explicitly routed to somewhere on the Podio app or otherwise discarded.</li>
+</ul>
+</li>
+<li>Our schema file should now look something like this. We'll stick with our theoretical business example to keep things simple:</li>
+</ul>
+
+<pre><code>business-title
+homepage-url
+founding-date
+business-type
+customer-types
+customer-type-descriptions
+business-info
+</code></pre>
+
+<ul>
+<li>As a last step, take note of the <strong>Podio App ID</strong> located at the top of the Developer page. This is usually an 8-digit number. We'll need this identifier later on in the integration process so that we can tell the integration software which Podio app we're working with.</li>
+</ul>
+
+<h4>
+<a id="2b-retrieving-qualtrics-question-information" class="anchor" href="#2b-retrieving-qualtrics-question-information" aria-hidden="true"><span class="octicon octicon-link"></span></a>2b. Retrieving Qualtrics question information</h4>
+
+<ul>
+<li>Next, we're going to match these Podio fields with the Qualtrics questions that we want to feed into them.</li>
+<li>Navigate to the Qualtrics survey you're going to integrate, and go to the Edit Survey page.</li>
+<li>In the second column of your schema file, type in the <strong>Question ID</strong> that you want to link to the corresponding Podio app field for that row. For our hypothetical business app, our schema file might now look something like this:</li>
+</ul>
+
+<pre><code>business-title,Q1
+homepage-url,Q2
+founding-date,Q3
+business-type,Q4
+customer-types,Q5
+customer-needs,Q6
+business-info,default
+</code></pre>
+
+<ul>
+<li>You'll also need to take note of the <strong>Qualtrics Survey ID</strong> for this survey, just like we did with the Podio App ID. You can get this identifier by clicking "Distribute Survey" and looking at the survey URL. The Survey ID is the part of the URL that looks like &amp;SID=<code>&lt;SURVEY_ID&gt;</code>. It should be something like <code>SV_3hsih4USJx9wsDX0</code>.</li>
+<li>The last thing we're going to need is a raw export of an example response for your survey. This software package contains a service that can pull that information for you:
+
+<ol>
+<li>Submit a sample response through your survey. Fill out as many questions as possible, especially if your survey has branching logic; this will help you get a better sense for how the data is formatted.</li>
+<li>Make sure your survey is shared with the VPOL group on Qualtrics.</li>
+<li>Go to <code>stanford.edu/~atkindel/vptl_integrations/survey_examiner.html</code>.</li>
+<li>Enter your survey ID into the webform and click <strong>Submit</strong>.</li>
+<li>The page will display the raw survey data for your sample response. You'll need this data shortly.</li>
+</ol>
+</li>
+</ul>
+
+<h4>
+<a id="2c-adding-question-type-information" class="anchor" href="#2c-adding-question-type-information" aria-hidden="true"><span class="octicon octicon-link"></span></a>2c. Adding question type information</h4>
+
+<ul>
+<li>The third column of our schema file contains a label corresponding to the type of data we're moving between Qualtrics and Podio. In some cases, we'll also need to edit the second column to give the software a bit more information about how Qualtrics labels its data.</li>
+<li>This integration software supports seven different data types:
+
+<ol>
+<li><code>text</code></li>
+<li><code>link</code></li>
+<li><code>date</code></li>
+<li><code>category</code></li>
+<li><code>multiple</code></li>
+<li><code>multitext</code></li>
+<li><code>default</code></li>
+</ol>
+</li>
+<li>
+<p>Below, we'll go into a little more detail here on how to handle each data type, in order of increasing complexity. For each data type, there are also some notes on how to set up your Podio app and Qualtrics survey so that they work nicely together.</p>
+
+<h5>
+<a id="1-text" class="anchor" href="#1-text" aria-hidden="true"><span class="octicon octicon-link"></span></a>1. <code>text</code>
+</h5>
+
+<ul>
+<li>
+<code>Text</code> fields are the easiest case to work with. Here, we just need to tell the schema file to expect text input, like so:</li>
+</ul>
+
+<pre><code>business-title,Q1,text
+</code></pre>
+
+<ul>
+<li>Podio field type: <code>text</code>
+</li>
+<li>Qualtrics question type: Text entry</li>
+</ul>
+
+<h5>
+<a id="2-link" class="anchor" href="#2-link" aria-hidden="true"><span class="octicon octicon-link"></span></a>2. <code>link</code>
+</h5>
+
+<ul>
+<li>
+<code>Link</code> fields allow you to embed URLs in your Podio app entry. These work similarly to text fields:</li>
+</ul>
+
+<pre><code>business-title,Q1,text
+homepage-url,Q2,link
+</code></pre>
+
+<ul>
+<li>Podio field type: <code>embed</code>
+</li>
+<li>Qualtrics question type: Text entry.
+
+<ul>
+<li>
+<strong>Note</strong>: The software will discard responses to this question type that aren't URLs if they're labeled as <code>link</code> in your schema file.</li>
+</ul>
+</li>
+</ul>
+
+<h5>
+<a id="3-date" class="anchor" href="#3-date" aria-hidden="true"><span class="octicon octicon-link"></span></a>3. <code>date</code>
+</h5>
+
+<ul>
+<li>
+<code>Date</code> fields work a lot like the above two data types:</li>
+</ul>
+
+<pre><code>business-title,Q1,text
+homepage-url,Q2,link
+founding-date,Q3,date
+</code></pre>
+
+<ul>
+<li>Podio field type: <code>date</code>
+</li>
+<li>Qualtrics question type: Text entry.
+
+<ul>
+<li>Additionally, you need to enable <em>content validation</em> for this question to constrain user responses to the date format <strong>yyyy/mm/dd</strong>. The software assumes that dates are formatted as such.</li>
+</ul>
+</li>
+</ul>
+
+<h5>
+<a id="4-category" class="anchor" href="#4-category" aria-hidden="true"><span class="octicon octicon-link"></span></a>4. <code>category</code>
+</h5>
+
+<ul>
+<li>
+<code>Category</code> fields are labeled similarly:</li>
+</ul>
+
+<pre><code>business-title,Q1,text
+homepage-url,Q2,link
+founding-date,Q3,date
+business-type,Q4,category
+</code></pre>
+
+<ul>
+<li>Podio field type: <code>category</code>.
+
+<ul>
+<li>This field should be set up to only allow a <em>single choice</em>.</li>
+</ul>
+</li>
+<li>Qualtrics question type: Multiple choice.
+
+<ul>
+<li>For fields with data type <code>category</code>, make sure that the options on Podio are in the same order as they appear on the Qualtrics survey when you create the Podio app. The integration software assumes the ordering is identical.</li>
+</ul>
+</li>
+<li>
+<strong>Note</strong>: Some of these questions have a text field associated with one or more of the possible responses. You can use the raw Qualtrics export data we collected above to identify these text fields and link them to Podio text fields as needed. For example, <strong>Q7_TEXT</strong> is the text field associated with <strong>Q7</strong> on Qualtrics.</li>
+</ul>
+
+<h5>
+<a id="5-multiple" class="anchor" href="#5-multiple" aria-hidden="true"><span class="octicon octicon-link"></span></a>5. <code>multiple</code>
+</h5>
+
+<ul>
+<li>This is where it starts to get a little tricky. <code>Multiple</code>-type fields need a little extra information about the Qualtrics question you're feeding them as a result of how Qualtrics stores data about checkbox-type questions.</li>
+<li>To accurately determine this information, we'll need to look at our sample export of the raw Qualtrics data.</li>
+<li>For this question number, you'll see a set of question responses in the raw data that correspond to whether the user checked the n-th box for that question. So for our hypothetical question 5, if a user checked boxes 2 and 3 on the Qualtrics survey and question 5 had 6 possible choices, the data will look like the following:</li>
+</ul>
+
+<pre><code>"Q5_1": ""
+"Q5_2": "1"
+"Q5_3": "1"
+"Q5_4": ""
+"Q5_5": ""
+"Q5_6": ""
+</code></pre>
+
+<ul>
+<li>Take the highest choice number and add it to the second column of your schema file, separated from the Question ID by a tilde ('~'). Then, add the <code>multiple</code> label to the third column. For example:</li>
+</ul>
+
+<pre><code>business-title,Q1,text
+homepage-url,Q2,link
+founding-date,Q3,date
+business-type,Q4,category
+customer-types,Q5~6,multiple
+</code></pre>
+
+<ul>
+<li>
+<strong>Note</strong>: Sometimes, the choices are numbered erratically, e.g. the choices might be numbered 1,2,3,7,8 rather than 1,2,3,4,5. If this shows up in your Qualtrics export data, you should delete that question, remake it, and check another export to ensure that the numbering is continuous. Otherwise, the Podio app runs into trouble determining which choice numbers correspond.</li>
+<li>Podio field type: <code>category</code>
+
+<ul>
+<li>This field should be set up to allow <em>multiple choices</em>.</li>
+</ul>
+</li>
+<li>Qualtrics question type: Multiple choice.
+
+<ul>
+<li>For fields with data type <code>multiple</code>, make sure that the options on Podio are in the same order as they appear on the Qualtrics survey when you create the Podio app. The integration software assumes the ordering is identical.</li>
+</ul>
+</li>
+</ul>
+
+<h5>
+<a id="6-multitext" class="anchor" href="#6-multitext" aria-hidden="true"><span class="octicon octicon-link"></span></a>6. <code>multitext</code>
+</h5>
+
+<ul>
+<li>Occasionally, you might have a single multiple choice question where multiple boxes may be checked and where each box has an associated text field. You can redirect these to individual text fields or capture them in your default field (more on that below), or you can concatenate them into one field.</li>
+<li>Take a look at your Qualtrics data. Questions that work with this data type will have something similar to the following:</li>
+</ul>
+
+<pre><code>"Q6_1": ""
+"Q6_2": "1"
+"Q6_3": ""
+"Q6_4": "1"
+"Q6_1_TEXT": ""
+"Q6_2_TEXT": "Example text."
+"Q6_3_TEXT": ""
+"Q6_4_TEXT": "Example text."
+</code></pre>
+
+<ul>
+<li>To route these text fields to a single Podio field, list the choice numbers with associated text fields in column two, separated from each other by dashes and from the question ID by a tilde. For example, the above example question would look like the following:</li>
+</ul>
+
+<pre><code>business-title,Q1,text
+homepage-url,Q2,link
+founding-date,Q3,date
+business-type,Q4,category
+customer-types,Q5~6,multiple
+customer-needs,Q6~1-2-3-4,multitext
+</code></pre>
+
+<ul>
+<li>Podio field type: <code>text</code>
+</li>
+<li>Qualtrics question(s) type: Text entry.</li>
+</ul>
+
+<h5>
+<a id="7-default" class="anchor" href="#7-default" aria-hidden="true"><span class="octicon octicon-link"></span></a>7. <code>default</code>
+</h5>
+
+<ul>
+<li>Each integration schema should have a default field on Podio to capture certain types of input from Qualtrics. Default fields are good for unpredictably formatted text responses (e.g. estimates, freeform responses) or for when you want human-readable access to data but don't need to interact with it systematically.
+
+<ul>
+<li>The default field does not work well with category-type data or answers to multiple-choice questions.</li>
+</ul>
+</li>
+<li>
+<em>On the last line of your schema file</em>, use the following notation to identify your default field:</li>
+</ul>
+
+<pre><code>business-title,Q1,text
+homepage-url,Q2,link
+founding-date,Q3,date
+business-type,Q4,category
+customer-types,Q5~6,multiple
+customer-needs,Q6~1-2-3-4,multitext
+business-info,default,default
+</code></pre>
+
+<ul>
+<li>The last thing we need to do is tell the software what data you want to route into the default field. To do that, we'll put together a mapping between the Qualtrics questions we want to capture and the labels we want to give those questions in our default field. We'll do this in our <code>default_labels</code> file.</li>
+<li>In first column of the <code>default_labels</code> file, list the Qualtrics question IDs you want to capture in your default field:</li>
+</ul>
+
+<pre><code>Q7
+Q8
+Q9
+Q10
+</code></pre>
+
+<ul>
+<li>In the second column, give each question a short descriptive label.</li>
+</ul>
+
+<pre><code>Q7,Founder
+Q8,City
+Q9,Mission statement
+Q10,Phone number
+</code></pre>
+</li>
+</ul>
+
+<h3>
+<a id="3-submitting-the-integration-files" class="anchor" href="#3-submitting-the-integration-files" aria-hidden="true"><span class="octicon octicon-link"></span></a>3. Submitting the integration files</h3>
+
+<ul>
+<li>Email the folder containing your integration files to Alex Kindel. Include a note with the following information:
+
+<ul>
+<li>A simple name for the integration (e.g. 'VPTL Events')</li>
+<li>Podio app ID</li>
+<li>Qualtrics survey ID</li>
+<li>A description of when or how often you'd like the integration to run (e.g. every morning at 6am, twice daily, every Friday at 8pm).</li>
+</ul>
+</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/atkindel">atkindel</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
