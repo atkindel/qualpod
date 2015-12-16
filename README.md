@@ -30,11 +30,11 @@ There are three steps to adding a new Qualtrics -> Podio integration.
 * The first thing we need to do is make sure we know which Qualtrics question is paired with which Podio field. To do this, we'll set up a *schema* that makes an explicit mapping between those pairs.
 * Open your schema file. *Note that the schema file always needs to be saved in .csv format, otherwise it won't function properly.* You can open the file in Excel, WordEdit, Notepad, or any other editing software; whatever you're most familiar with will work. This tutorial will assume you're using a basic text editor.
 * To get started, here are a few example lines from a theoretical integration:
-  ```
-  business-title,Q1,text
-  business-type,Q4,category
-  customer-types,Q5~8,multiple
-  ```
+```
+business-title,Q1,text
+business-type,Q4,category
+customer-types,Q5~8,multiple
+```
 * Note that each line has four fields. Those fields correspond to the following:
   1. Podio field identifier, e.g. `event-title` or `event-description`
   2. Qualtrics question identifier, e.g. `Q14` or `Q12_TEXT`
@@ -51,15 +51,15 @@ There are three steps to adding a new Qualtrics -> Podio integration.
   * If you have a field you want to use to capture special notes or other questions from the Qualtrics form not captured in their own distinct Podio fields, *list that field last in the schema file*. We'll review how to set up these 'default' fields shortly.
   * Not every field on Podio needs to be automatically populated. However, the software does assume that every question response received on Qualtrics will be either explicitly routed to somewhere on the Podio app or otherwise discarded.
 * Our schema file should now look something like this. We'll stick with our theoretical business example to keep things simple:
-  ```
-  business-title
-  homepage-url
-  founding-date
-  business-type
-  customer-types
-  customer-type-descriptions
-  business-info
-  ```
+```
+business-title
+homepage-url
+founding-date
+business-type
+customer-types
+customer-type-descriptions
+business-info
+```
 * As a last step, take note of the **Podio App ID** located at the top of the Developer page. This is usually an 8-digit number. We'll need this identifier later on in the integration process so that we can tell the integration software which Podio app we're working with.
 
 #### 2b. Retrieving Qualtrics question information
@@ -67,15 +67,15 @@ There are three steps to adding a new Qualtrics -> Podio integration.
 * Next, we're going to match these Podio fields with the Qualtrics questions that we want to feed into them.
 * Navigate to the Qualtrics survey you're going to integrate, and go to the Edit Survey page.
 * In the second column of your schema file, type in the **Question ID** that you want to link to the corresponding Podio app field for that row. For our hypothetical business app, our schema file might now look something like this:
-  ```
-  business-title,Q1
-  homepage-url,Q2
-  founding-date,Q3
-  business-type,Q4
-  customer-types,Q5
-  customer-needs,Q6
-  business-info,default
-  ```
+```
+business-title,Q1
+homepage-url,Q2
+founding-date,Q3
+business-type,Q4
+customer-types,Q5
+customer-needs,Q6
+business-info,default
+```
 * You'll also need to take note of the **Qualtrics Survey ID** for this survey, just like we did with the Podio App ID. You can get this identifier by clicking "Distribute Survey" and looking at the survey URL. The Survey ID is the part of the URL that looks like &SID=`<SURVEY_ID>`. It should be something like `SV_3hsih4USJx9wsDX0`.
 * The last thing we're going to need is a raw export of an example response for your survey. This software package contains a service that can pull that information for you:
   1. Submit a sample response through your survey. Fill out as many questions as possible, especially if your survey has branching logic; this will help you get a better sense for how the data is formatted.
