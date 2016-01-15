@@ -59,5 +59,5 @@ class QualtricsPodioIntegration(object):
 
 
 if __name__ == '__main__':
-    qpi = QualtricsPodioIntegration("/code/qualpod/integrations/vptl_integrations.csv")
+    qpi = QualtricsPodioIntegration("/Code/qualpod/integrations/vptl_integrations.csv")
     qpi.run()
