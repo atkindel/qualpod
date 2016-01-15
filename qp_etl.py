@@ -5,6 +5,8 @@
 import csv
 import os.path
 import datetime
+import sys
+import traceback
 
 from p_interface import PodioInterface
 from q_interface import QualtricsInterface
@@ -40,6 +42,7 @@ class QualtricsPodioIntegration(object):
                     qualtrics = QualtricsInterface(survey, schema)
                     data, transform = qualtrics.export()
                 except Exception as e:
+                    traceback.print_exc(file=sys.stdout)
                     logfile.write("[%s][%s]: %s\n" % (timestamp, label, repr(e)))
                     continue
 
@@ -49,6 +52,7 @@ class QualtricsPodioIntegration(object):
                     podio = PodioInterface(app, default)
                     status = podio.load(data, transform)
                 except Exception as e:
+                    traceback.print_exc(file=sys.stdout)
                     logfile.write("[%s][%s]: %s\n" % (timestamp, label, repr(e)))
                     continue
 
