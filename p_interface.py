@@ -112,7 +112,7 @@ class PodioInterface(object):
                             continue
                         if question in self.labels.keys():
                             question = self.labels[question]
-                        else
+                        else:
                             continue
                         def_field += "<b>%s</b>: %s<br/>" % (question, val)
                     def_field += "</p>"
